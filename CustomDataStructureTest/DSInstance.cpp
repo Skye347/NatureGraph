@@ -1,5 +1,8 @@
 #include"DSInstance.h"
+#include<cstdlib>
 #include<iostream>
+#include<fstream>
+#include<string>
 
 LinkListNode* LinkListNode::next()
 {
@@ -124,12 +127,14 @@ GraphManager::GraphManager()
 {
 	mode = 1;
 	NodeCount = 0;
+	current = -1;
 }
 
 GraphManager::GraphManager(int mode)
 {
 	this->mode = mode;
 	NodeCount = 0;
+	current = -1;
 }
 
 pGraphNode GraphManager::NewGraph(int IntData=-1, PVOID CustomData = NULL)
@@ -141,6 +146,7 @@ pGraphNode GraphManager::NewGraph(int IntData=-1, PVOID CustomData = NULL)
 	tempNew->DataArea = CustomData;
 	this->GraphNodePool.push_back(tempNew);
 	NodeCount++;
+	current = GraphNodePool.capacity() - 1;
 	return tempNew;
 }
 
@@ -251,4 +257,52 @@ pLinker LinkerManager::RequestNewLinker(int weight)
 		}
 	}
 	return temp;
+}
+
+bool DotFileGenerate(GraphManager * Graph)
+{
+	std::ofstream targetFile;
+	targetFile.open("generate2.dot");
+	std::string endline = ";\n";
+	std::string buffer = "";
+	std::string num;
+	std::string num2;
+	if (Graph->mode == 2) {
+		std::string head = "digraph GenerateNo0 {\n";
+		buffer += head;
+		std::string edge = "->";
+		int count = Graph->NodeCount;
+		for (int i = 0; i < count; i++) {
+			pGraphNode temp = Graph->GraphNodePool.at(i);
+			num = temp->IntData + 48;
+			int edgeCount = temp->LinkerList.capacity();
+			for (int j = 0; j < edgeCount; j++) {
+				pGraphNode bingo = (pGraphNode)(temp->LinkerList.at(j)->GetThat(temp));
+				if (bingo != nullptr) {
+					buffer += "    ";
+					num2 = bingo->IntData + 48;
+					buffer += num;
+					buffer += edge;
+					buffer += num2;
+					buffer += endline;
+				}
+			}
+		}
+		buffer += "}\n\n";
+		targetFile << buffer;
+	}
+	else if (Graph->mode == 2) {
+		char head[22] = "graph GenerateNo.0 {\n";
+		char edge[3] = "--";
+		std::cout << "Unsupport for now" << std::endl;
+	}
+	else {
+		buffer += "[ERROR]Mode not correct\n";
+		targetFile << buffer;
+		targetFile.close();
+		return false;
+	}
+	//
+	targetFile.close();
+	return true;
 }

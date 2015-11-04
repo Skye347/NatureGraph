@@ -26,7 +26,7 @@ public:
 private:
 	int inDegree;
 	int outDegree;
-	int mode;//1 for digraph, 2 for undigraph 
+	int mode;//1 for undirected, 2 for directed 
 };
 
 typedef GraphNode* pGraphNode;
@@ -61,11 +61,15 @@ public:
 	//remove
 	bool Link(pGraphNode,pGraphNode,int);
 	//
+	friend bool DotFileGenerate(GraphManager*);
 	GraphNodeSet Find(int);
 	bool Find(pGraphNode);
 protected:
+	int current;
 	std::vector<pGraphNode> GraphNodePool;
 	LinkerManager LinkerPool;
 	int NodeCount;
 	int mode;
 };
+
+bool DotFileGenerate(GraphManager*);

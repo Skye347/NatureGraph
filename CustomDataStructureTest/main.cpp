@@ -12,10 +12,12 @@ int main() {
 	pool.Link(n1, n2, 1);
 	pool.Link(n1, n3, 8);
 	pool.Link(n1, n4, 3);
+	pool.Link(n1, n5, 3);
 	pool.Link(n3, n4, 4);
 	pool.Link(n5, n3, 2);
 	pool.Link(n5, n1, 6);
 	n5->Roll();
+	DotFileGenerate(&pool);
 	//system("pause");
 	return 1;
 }
