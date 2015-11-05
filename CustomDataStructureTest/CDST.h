@@ -8,9 +8,9 @@ public:
 	Linker();
 	Linker(int);
 	PVOID Port1;
-	int Id1;
+	size_t Id1;
 	PVOID Port2;
-	int Id2;
+	size_t Id2;
 	int Weight;
 	PVOID GetThat(PVOID);
 }*pLinker;

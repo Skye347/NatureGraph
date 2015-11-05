@@ -23,10 +23,11 @@ public:
 	int getMode();
 	void setMode(int);
 	void Roll();
+	int ID;
 private:
 	int inDegree;
 	int outDegree;
-	int mode;//1 for undirected, 2 for directed 
+	int mode;//1 for undirected, 2 for directed, 3 for binary tree
 };
 
 typedef GraphNode* pGraphNode;
@@ -57,7 +58,7 @@ public:
 	GraphManager();
 	GraphManager(int);
 	//
-	pGraphNode NewGraph(int,PVOID);
+	pGraphNode NewGraph(int,PVOID=nullptr);
 	//remove
 	bool Link(pGraphNode,pGraphNode,int);
 	//
@@ -65,11 +66,11 @@ public:
 	GraphNodeSet Find(int);
 	bool Find(pGraphNode);
 protected:
-	int current;
+	size_t current;
 	std::vector<pGraphNode> GraphNodePool;
 	LinkerManager LinkerPool;
 	int NodeCount;
-	int mode;
+	int mode;//1 for undirected, 2 for directed, 3 for binary tree
 };
 
 bool DotFileGenerate(GraphManager*);
