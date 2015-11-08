@@ -4,6 +4,7 @@
 #include<fstream>
 #include<string>
 #include<sstream>
+#include<vector>
 
 LinkListNode* LinkListNode::next()
 {
@@ -37,7 +38,7 @@ bool LinkListNode::next(LinkListNode * nextnode)
 
 LinkListNode * LinkListNode::last()
 {
-	if(this->LastL==nullptr)
+	if (this->LastL == nullptr)
 		return nullptr;
 	else {
 		if (this->LastL->Id1 != 2) {
@@ -68,13 +69,13 @@ GraphNode::GraphNode(int mode)
 	ID = (int)this;
 }
 
-bool GraphNode::Add(GraphNode * newGraphNode,int Weight = 0,pLinker LinkerToUse=NULL)
+bool GraphNode::Add(GraphNode * newGraphNode, int Weight = 0, pLinker LinkerToUse = NULL)
 {
 	pLinker temp;
 	if (newGraphNode == nullptr) {
 		return false;
 	}
-	if (LinkerToUse==NULL) {
+	if (LinkerToUse == NULL) {
 		temp = new Linker(Weight);
 	}
 	else {
@@ -83,31 +84,33 @@ bool GraphNode::Add(GraphNode * newGraphNode,int Weight = 0,pLinker LinkerToUse=
 	if (temp == nullptr) {
 		return false;
 	}
-	if ((newGraphNode->LinkerList[0] != nullptr) || (newGraphNode->LinkerList[1] != nullptr)) {
-		return false;
+	if (mode == 3) {
+		if ((newGraphNode->LinkerList[0] != nullptr) || (newGraphNode->LinkerList[1] != nullptr)) {
+			return false;
+		}
 	}
 	temp->Port1 = this;
-	temp->Id1 = LinkerList.capacity();
+	temp->Id1 = LinkerList.size();
 	temp->Port2 = newGraphNode;
-	temp->Id2 = newGraphNode->LinkerList.capacity();
+	temp->Id2 = newGraphNode->LinkerList.size();
 	if (mode == 1) {
 		inDegree++;
 		outDegree++;
 		newGraphNode->inDegree++;
 		newGraphNode->outDegree++;
-		temp->Id2 = newGraphNode->LinkerList.capacity();
+		//temp->Id2 = newGraphNode->LinkerList.capacity();
 		newGraphNode->LinkerList.push_back(temp);
 		newGraphNode->current = temp->Id2;
 		LinkerList.push_back(temp);
 	}
-	else if(mode==2){
+	else if (mode == 2) {
 		outDegree++;
 		newGraphNode->inDegree++;
-		temp->Id2 = -1;
+		//temp->Id2 = -1;
 		LinkerList.push_back(temp);
 	}
 	else if (mode == 3) {
-		if (Weight == 0||newGraphNode->mode!=3) {
+		if (Weight == 0 || newGraphNode->mode != 3) {
 			return false;
 			//error
 		}
@@ -143,12 +146,11 @@ int GraphNode::getMode()
 
 void GraphNode::setMode(int mode)
 {
-	this->mode=mode;
+	this->mode = mode;
 }
 
 void GraphNode::Roll()
 {
-	
 	if (mode == 3) {
 		if (LinkerList.at(2) == nullptr) {
 			std::cout << "I am the root with data" << IntData << std::endl;
@@ -163,16 +165,16 @@ void GraphNode::Roll()
 			std::cout << "My left is" << pGraphNode(LinkerList.at(0)->Port2)->IntData << std::endl;
 		}
 		if (LinkerList.at(1) == nullptr) {
-			std::cout << "No right" <<  std::endl;
+			std::cout << "No right" << std::endl;
 		}
 		else {
 			std::cout << "My right is" << pGraphNode(LinkerList.at(1)->Port2)->IntData << std::endl;
 		}
 		return;
 	}
-	
-	int temp_current=0;
-	for (; temp_current < LinkerList.capacity(); temp_current++) {
+
+	int temp_current = 0;
+	for (; temp_current < LinkerList.size(); temp_current++) {
 		pGraphNode temp = (pGraphNode)LinkerList.at(temp_current)->GetThat(this);
 		if (temp != nullptr) {
 			std::cout << temp->IntData << " Weight:" << (pGraphNode)LinkerList.at(temp_current)->Weight << std::endl;
@@ -182,6 +184,21 @@ void GraphNode::Roll()
 		}
 	}
 	current = temp_current;
+}
+
+void GraphNode::RemoveLinker(pLinker target)
+{
+	std::vector<pLinker>::iterator Iterator;
+	for (Iterator = LinkerList.begin(); Iterator != LinkerList.end(); Iterator++) {
+		if (target == *Iterator) {
+			if (mode == 3) {
+				*Iterator = nullptr;
+				break;
+			}
+			LinkerList.erase(Iterator);
+			break;
+		}
+	}
 }
 
 GraphManager::GraphManager()
@@ -198,10 +215,10 @@ GraphManager::GraphManager(int mode)
 	current = -1;
 }
 
-pGraphNode GraphManager::NewGraph(int IntData=-1, PVOID CustomData)
+pGraphNode GraphManager::NewGraph(int IntData = -1, PVOID CustomData)
 {
 	pGraphNode tempNew = new GraphNode(mode);
-	if(tempNew==nullptr)
+	if (tempNew == nullptr)
 		return nullptr;
 	tempNew->IntData = IntData;
 	tempNew->DataArea = CustomData;
@@ -212,7 +229,7 @@ pGraphNode GraphManager::NewGraph(int IntData=-1, PVOID CustomData)
 	return tempNew;
 }
 
-bool GraphManager::Link(pGraphNode n1, pGraphNode n2,int Weight=0)//in tree mode,Weight=1 for left and Weight=2 for right.0 is not allowed
+bool GraphManager::Link(pGraphNode n1, pGraphNode n2, int Weight = 0)//in tree mode,Weight=1 for left and Weight=2 for right.0 is not allowed
 {
 	if (!Find(n1)) {
 		return false;
@@ -248,11 +265,37 @@ GraphNodeSet GraphManager::Find(int target)
 bool GraphManager::Find(pGraphNode target)
 {
 	for (int i = 0; i < NodeCount; i++) {
-		if (GraphNodePool.at(i)==target) {
+		if (GraphNodePool.at(i) == target) {
 			return true;
 		}
 	}
 	return false;
+}
+
+void GraphManager::Unlink(pGraphNode tar1, pGraphNode tar2)
+{
+	for (int i = 0; i < tar1->LinkerList.size(); i++) {
+		if (tar1->LinkerList.at(i)->GetThat(tar1) == tar2) {
+			pLinker temp = tar1->LinkerList.at(i);
+			tar1->RemoveLinker(temp);
+			tar2->RemoveLinker(temp);
+			LinkerPool.RemoveLinker(temp);
+			break;
+		}
+	}
+}
+
+void Unlink(pGraphNode tar1, pGraphNode tar2)
+{
+	for (int i = 0; i < tar1->LinkerList.size(); i++) {
+		if (tar1->LinkerList.at(i)->GetThat(tar1) == tar2) {
+			pLinker temp = tar1->LinkerList.at(i);
+			tar1->RemoveLinker(temp);
+			tar2->RemoveLinker(temp);
+			delete temp;
+			break;
+		}
+	}
 }
 
 LinkerManager::LinkerManager()
@@ -262,9 +305,41 @@ LinkerManager::LinkerManager()
 	current = nullptr;
 }
 
+void LinkerManager::RemoveLinker(pLinker Target)
+{
+	struct _LinkerManageList* temp = Head;
+	for (;;) {
+		if (temp->pL == Target) {
+			if (temp->last == nullptr) {
+				Head = temp->next;
+				Head->last = nullptr;
+				delete temp;
+			}
+			else if (temp->next == nullptr) {
+				temp->last->next = nullptr;
+				delete temp;
+			}
+			else {
+				struct _LinkerManageList* pre = temp->last;
+				pre->next = temp->next;
+				temp->next->last = pre;
+				delete temp;
+			}
+			Count++;
+			break;
+		}
+		if (temp->next != nullptr) {
+			temp = temp->next;
+		}
+		else {
+			break;
+		}
+	}
+}
+
 pLinker LinkerManager::RequestNewLinker(int weight)
 {
-	pLinker temp= new Linker(weight);
+	pLinker temp = new Linker(weight);
 	if (Count == 0) {
 		temp = new Linker(weight);
 		if (temp == nullptr) {
@@ -346,7 +421,7 @@ bool DotFileGenerate(GraphManager * Graph)
 		for (int i = 0; i < count; i++) {
 			pGraphNode temp = Graph->GraphNodePool.at(i);
 			num = temp->IntData + 48;
-			int edgeCount = temp->LinkerList.capacity();
+			int edgeCount = temp->LinkerList.size();
 			for (int j = 0; j < edgeCount; j++) {
 				pGraphNode bingo = (pGraphNode)(temp->LinkerList.at(j)->GetThat(temp));
 				if (bingo != nullptr) {
@@ -355,7 +430,7 @@ bool DotFileGenerate(GraphManager * Graph)
 					std::stringstream IDStr;
 					IDStr << temp->ID;
 					buffer += "ID";
-					buffer += IDStr.str()+="_";
+					buffer += IDStr.str() += "_";
 					IDStr.str("");
 					buffer += num;
 					buffer += edge;
@@ -391,7 +466,7 @@ bool DotFileGenerate(GraphManager * Graph)
 			}
 			buffer += "    ";
 			num = ((pGraphNode)RollTmp->pL->Port1)->IntData + 48;
-			num2= ((pGraphNode)RollTmp->pL->Port2)->IntData + 48;
+			num2 = ((pGraphNode)RollTmp->pL->Port2)->IntData + 48;
 			IDStr << ((pGraphNode)RollTmp->pL->Port1)->ID;
 			buffer += "ID";
 			buffer += IDStr.str() += "_";

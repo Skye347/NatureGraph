@@ -14,15 +14,16 @@ private:
 
 typedef LinkListNode* pLinkListNode;
 
-class GraphNode:public NodeNx {
-//id=6
+class GraphNode :public NodeNx {
+	//id=6
 public:
 	GraphNode();
 	GraphNode(int);
-	bool Add(GraphNode*,int,pLinker);
+	bool Add(GraphNode*, int, pLinker);
 	int getMode();
 	void setMode(int);
 	void Roll();
+	void RemoveLinker(pLinker);
 	int ID;
 private:
 	int inDegree;
@@ -35,6 +36,7 @@ typedef GraphNode* pGraphNode;
 class LinkerManager {
 public:
 	LinkerManager();
+	void RemoveLinker(pLinker Target);
 	pLinker RequestNewLinker(int);
 	struct _LinkerManageList {
 		struct _LinkerManageList* last;
@@ -52,19 +54,20 @@ typedef struct _GraphNodeSet
 	int count;
 }GraphNodeSet;
 
-class GraphManager{
+class GraphManager {
 public:
 	//
 	GraphManager();
 	GraphManager(int);
 	//
-	pGraphNode NewGraph(int,PVOID=nullptr);
+	pGraphNode NewGraph(int, PVOID = nullptr);
 	//remove
-	bool Link(pGraphNode,pGraphNode,int);
+	bool Link(pGraphNode, pGraphNode, int);
 	//
 	friend bool DotFileGenerate(GraphManager*);
 	GraphNodeSet Find(int);
 	bool Find(pGraphNode);
+	void Unlink(pGraphNode, pGraphNode);
 protected:
 	size_t current;
 	std::vector<pGraphNode> GraphNodePool;

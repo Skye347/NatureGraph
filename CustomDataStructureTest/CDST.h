@@ -3,7 +3,7 @@ typedef void* PVOID;
 #include<vector>
 
 typedef class Linker {
-//ID=0
+	//ID=0
 public:
 	Linker();
 	Linker(int);
@@ -16,7 +16,7 @@ public:
 }*pLinker;
 
 typedef class Node2x {
-//ID=1
+	//ID=1
 public:
 	Node2x();
 	int IntData;
@@ -27,7 +27,7 @@ protected:
 }*pNode2x;
 
 typedef class NodeNx {
-//ID=5
+	//ID=5
 public:
 	NodeNx();
 	int IntData;
